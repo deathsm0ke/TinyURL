@@ -11,10 +11,20 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 builder.Services.AddOpenApi();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngular", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200") // Angular URL
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
 builder.Services.AddDbContext<ApiDbContext>(options =>options.UseSqlite("Data Source=tinyurl.db"));
 var app = builder.Build();
 
 
+app.UseCors("AllowAngular");
 
 // --- UTILITY LOGIC ---
 
@@ -60,14 +70,17 @@ app.MapGet("/api/public", async (ApiDbContext db) =>
 app.MapGet("/{code}", async (string code, ApiDbContext db) =>
 {
     var entry = await db.Urls.FirstOrDefaultAsync(u => u.ShortCode == code);
-
     if (entry == null) return Results.NotFound();
 
-    
     entry.ClickCount++;
     await db.SaveChangesAsync();
 
-    return Results.Redirect(entry.LongUrl);
+    // Ensure the URL has a protocol, otherwise the browser stays on localhost
+    var destination = entry.LongUrl.StartsWith("http")
+                      ? entry.LongUrl
+                      : $"https://{entry.LongUrl}";
+
+    return Results.Redirect(destination);
 });
 
 // DELETE: Remove a Short URL

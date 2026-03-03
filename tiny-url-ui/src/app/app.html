@@ -1,0 +1,83 @@
+<div class="dashboard-wrapper">
+  <div class="container">
+    <header>
+      <h1>Tiny URL</h1>
+      <p class="subtitle">Shorten your links, track your clicks.</p>
+    </header>
+
+    <section class="input-card">
+      <div class="form-group">
+        <input 
+          type="text" 
+          [(ngModel)]="longUrl" 
+          placeholder="https://example.com/very-long-link-to-shorten" 
+          class="main-input"
+        >
+        
+        <div class="options-row">
+          <label class="checkbox-container">
+            <input type="checkbox" [(ngModel)]="isPrivate">
+            <span class="checkmark"></span>
+            Private Link
+          </label>
+          <small class="hint">(Private links won't show in the public list below)</small>
+        </div>
+
+        <button class="btn-generate" (click)='generateUrl()'>
+          Generate Short URL
+        </button>
+      </div>
+    </section>
+
+    <section class="list-section">
+      <div class="list-header">
+        <h2>Publicly Shortened URLs</h2>
+        <button class="btn-refresh" (click)="loadUrls()">↻ Refresh</button>
+      </div>
+
+      <div class="table-container">
+        <table class="url-table">
+          <thead>
+            <tr>
+              <th>Short URL & Original</th>
+              <th class="text-center">Clicks</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let url of publicUrls">
+              <td>
+                <a [href]="'https://localhost:7135/' + url.shortCode" target="_blank" class="short-code">
+                  localhost:7135/{{url.shortCode}}
+                </a>
+                <div class="long-url-text">{{url.longUrl}}</div>
+              </td>
+              
+              <td class="text-center">
+                <span class="click-badge">{{url.clickCount}}</span>
+              </td>
+
+              <td class="text-right">
+                <div class="action-buttons">
+                  <button class="btn-icon copy" (click)="copyToClipboard(url.shortCode)" title="Copy Link">
+                    Copy
+                  </button>
+                  
+                  <button class="btn-icon delete" (click)="deleteUrl(url.shortCode)" title="Delete Link">
+                    Delete
+                  </button>
+                </div>
+              </td>
+            </tr>
+
+            <tr *ngIf="publicUrls.length === 0">
+              <td colspan="3" class="empty-state">
+                No public links found. Try generating one above!
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</div>
