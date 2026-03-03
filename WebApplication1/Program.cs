@@ -32,7 +32,7 @@ string GenerateShortCode() => Guid.NewGuid().ToString("n").Substring(0, 6);
 
 // --- API ROUTES ---
 
-// 1. POST: Create a Short URL
+// POST: Create a Short URL
 
 app.MapPost("/api/url", async (TinyUrlRequest request, ApiDbContext db) =>
 {
@@ -75,7 +75,7 @@ app.MapGet("/{code}", async (string code, ApiDbContext db) =>
     entry.ClickCount++;
     await db.SaveChangesAsync();
 
-    // Ensure the URL has a protocol, otherwise the browser stays on localhost
+    // Add protocol, otherwise the browser stays on localhost
     var destination = entry.LongUrl.StartsWith("http")
                       ? entry.LongUrl
                       : $"https://{entry.LongUrl}";
@@ -99,5 +99,5 @@ app.MapDelete("/api/delete/{code}", async (string code, ApiDbContext db) =>
 
 app.Run();
 
-// DTO (Data Transfer Object) for the POST request
+
 public record TinyUrlRequest(string LongUrl, bool IsPrivate);

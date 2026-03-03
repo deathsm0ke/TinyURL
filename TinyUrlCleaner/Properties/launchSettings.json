@@ -1,0 +1,15 @@
+{
+  "profiles": {
+    "TinyUrlCleaner": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7049",
+      "launchBrowser": false
+    }
+  },
+
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated"
+  }
+}
