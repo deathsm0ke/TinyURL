@@ -40,7 +40,7 @@ export class AppComponent implements OnInit {
   copyToClipboard(code: string) {
   	const fullUrl = `https://localhost:7135/${code}`;
   	navigator.clipboard.writeText(fullUrl).then(() => {
-    	// You could replace this alert with a toast message for better UI
+  
     	alert('Short URL copied to clipboard!');
   	});
  }

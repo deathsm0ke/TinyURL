@@ -20,7 +20,21 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader();
     });
 });
-builder.Services.AddDbContext<ApiDbContext>(options =>options.UseSqlite("Data Source=tinyurl.db"));
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+builder.Services.AddDbContext<ApiDbContext>(options =>
+{
+    // Detect if we are in Azure (which uses SQL Server) or Local (SQLite)
+    if (connectionString != null && (connectionString.Contains("database.windows.net") || connectionString.Contains("Server=")))
+    {
+        options.UseSqlServer(connectionString);
+    }
+    else
+    {
+        // Fallback to local SQLite if no cloud string is found
+        options.UseSqlite(connectionString ?? "Data Source=tinyurl.db");
+    }
+});
 var app = builder.Build();
 
 

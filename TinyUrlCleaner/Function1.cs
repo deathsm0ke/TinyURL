@@ -17,37 +17,49 @@ namespace TinyUrlCleaner
 
 
         [Function("CleanupOldUrls")]
-        public async Task Run([TimerTrigger("0 0 * * * *")] TimerInfo myTimer) // for test 10 second Run([TimerTrigger("*/10 * * * * *")]
+        public async Task Run([TimerTrigger("0 0 * * * *")] TimerInfo myTimer)
+        // Use "*/10 * * * * *" for 10-second testing
         {
             _logger.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
 
-            // Get the directory where the Function is running
-            string executionDir = AppContext.BaseDirectory;
-
-
-            
-            string dbPath = Path.GetFullPath(Path.Combine(executionDir, "..\\..\\..\\..\\WebApplication1\\tinyurl.db"));
-
-            _logger.LogInformation($"Looking for database at: {dbPath}");
-
-            
-            if (!File.Exists(dbPath))
-            {
-                _logger.LogError($"FILE NOT FOUND! Please check this path: {dbPath}");
-                return;
-            }
+            // 1. Get Connection String from Environment (Azure) or local settings
+            string connString = (Environment.GetEnvironmentVariable("ConnectionStrings:DefaultConnection")
+                    ?? Environment.GetEnvironmentVariable("DefaultConnection"))
+                    ?? string.Empty;
 
             var optionsBuilder = new DbContextOptionsBuilder<ApiDbContext>();
-            optionsBuilder.UseSqlite($"Data Source={dbPath}");
 
+            // 2. Determine Environment and Configure DB
+            if (!string.IsNullOrEmpty(connString) && (connString.Contains("database.windows.net") || connString.Contains("Server=")))
+            {
+                // CLOUD MODE: Use Azure SQL
+                _logger.LogInformation("Using Azure SQL Database.");
+                optionsBuilder.UseSqlServer(connString);
+            }
+            else
+            {
+                // LOCAL MODE: Use SQLite
+                string executionDir = AppContext.BaseDirectory;
+                // Adjust path to find the .db file relative to your function execution folder
+                string dbPath = Path.GetFullPath(Path.Combine(executionDir, "..\\..\\..\\..\\WebApplication1\\tinyurl.db"));
+
+                _logger.LogInformation($"Using Local SQLite at: {dbPath}");
+
+                if (!File.Exists(dbPath))
+                {
+                    _logger.LogError($"SQLite FILE NOT FOUND at: {dbPath}");
+                    return;
+                }
+                optionsBuilder.UseSqlite($"Data Source={dbPath}");
+            }
+
+            // 3. Execute Cleanup Logic
             using (var db = new ApiDbContext(optionsBuilder.Options))
             {
                 try
                 {
-                    var allUrls = await db.Urls.ToListAsync();
-                    int count = allUrls.Count;
-                    db.Urls.RemoveRange(allUrls);
-                    await db.SaveChangesAsync();
+                    // Efficiency Tip: Use ExecuteDeleteAsync for better performance in .NET 8
+                    int count = await db.Urls.ExecuteDeleteAsync();
                     _logger.LogInformation($"SUCCESS: Deleted {count} URLs from the database.");
                 }
                 catch (Exception ex)
