@@ -25,7 +25,7 @@ jobs:
       # --- STEP 2: BUILD ANGULAR UI ---
       - name: Build Angular
         run: |
-          cd **/tiny-url-ui
+          cd WebApplication1/tiny-url-ui
           npm install
           npm run build -- --configuration production
           # Create the wwwroot in the API folder and copy the UI build there
