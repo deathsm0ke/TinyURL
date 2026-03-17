@@ -1,0 +1,57 @@
+name: Build and Deploy TinyURL Suite
+
+on:
+  push:
+    branches: [ "master", "main" ] # Triggers on push to either branch name
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      # --- STEP 1: SETUP ENVIRONMENTS ---
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22' # High version for Angular 19+
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      # --- STEP 2: BUILD ANGULAR UI ---
+      - name: Build Angular
+        run: |
+          cd tiny-url-ui
+          npm install
+          npm run build -- --configuration production
+          # Create the wwwroot in the API folder and copy the UI build there
+          mkdir -p ../TinyUrlApi/wwwroot
+          cp -r dist/tiny-url-ui/browser/* ../TinyUrlApi/wwwroot/
+
+      # --- STEP 3: PUBLISH .NET 10 API ---
+      - name: Publish API
+        run: dotnet publish TinyUrlApi/TinyUrlApi.csproj -c Release -o ./publish_api
+
+      # --- STEP 4: PUBLISH .NET 10 FUNCTION (Isolated) ---
+      - name: Publish Function
+        run: dotnet publish TinyUrlCleaner/TinyUrlCleaner.csproj -c Release -o ./publish_function
+
+      # --- STEP 5: DEPLOY API + UI TO WEB APP ---
+      - name: Deploy Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'tinyurl-api-a' 
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: ./publish_api
+
+      # --- STEP 6: DEPLOY CLEANER TO FUNCTION APP ---
+      - name: Deploy Function App
+        uses: azure/functions-action@v1
+        with:
+          app-name: 'tiny-url-cleaner-a'
+          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+          package: ./publish_function

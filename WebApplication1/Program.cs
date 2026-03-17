@@ -39,7 +39,8 @@ var app = builder.Build();
 
 
 app.UseCors("AllowAngular");
-
+app.UseDefaultFiles();
+app.UseStaticFiles();
 // --- UTILITY LOGIC ---
 
 string GenerateShortCode() => Guid.NewGuid().ToString("n").Substring(0, 6);
