@@ -38,15 +38,25 @@ jobs:
           # 1. Publish the .NET binaries
           dotnet publish WebApplication1/WebApplication1.csproj -c Release -o ./publish_api
           
-          # 2. Create the wwwroot folder in the publish directory
+          # 2. Create the wwwroot folder
           mkdir -p ./publish_api/wwwroot
           
-          # 3. Copy the Angular assets from the DOUBLE NESTED browser folder
-          # Based on your logs, the path is: tiny-url-ui/dist/browser/browser/
-          cp -r WebApplication1/tiny-url-ui/dist/browser/browser/* ./publish_api/wwwroot/
+          # 3. DYNAMIC SEARCH AND COPY
+          # This command looks for the folder containing index.html inside the UI directory
+          # and copies everything from THAT folder into our publish wwwroot.
+          UI_DIST_DIR=$(find WebApplication1/tiny-url-ui/dist -name "index.html" -printf '%h\n' | head -n 1)
           
-          # 4. FINAL CHECK: Confirm index.html is in the right place
-          echo "Final check of the deployment package (wwwroot):"
+          echo "Discovered Angular files at: $UI_DIST_DIR"
+          
+          if [ -z "$UI_DIST_DIR" ]; then
+            echo "ERROR: index.html not found in any dist subfolder!"
+            exit 1
+          fi
+          
+          cp -r "$UI_DIST_DIR"/* ./publish_api/wwwroot/
+          
+          # 4. DIAGNOSTIC: This MUST show index.html, main.js, etc.
+          echo "Listing final publish package wwwroot:"
           ls -F ./publish_api/wwwroot
 
       # --- STEP 4: PUBLISH .NET 10 FUNCTION (Isolated) ---
