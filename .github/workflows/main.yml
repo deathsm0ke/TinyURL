@@ -53,6 +53,7 @@ jobs:
           # 4. FINAL VERIFICATION (Check the logs for this!)
           echo "Listing final publish package wwwroot content:"
           ls -F ./publish_api/wwwroot
+          
 
       # --- STEP 4: PUBLISH .NET 10 FUNCTION (Isolated) ---
       - name: Publish Function
