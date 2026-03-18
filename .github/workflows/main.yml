@@ -34,11 +34,11 @@ jobs:
 
       # --- STEP 3: PUBLISH .NET 10 API ---
       - name: Publish API
-        run: dotnet publish **/TinyUrlApi.csproj -c Release -o ./publish_api
+        run: dotnet publish WebApplication1/WebApplication1.csproj -c Release -o ./publish_api
 
       # --- STEP 4: PUBLISH .NET 10 FUNCTION (Isolated) ---
       - name: Publish Function
-        run: dotnet publish **/TinyUrlCleaner.csproj -c Release -o ./publish_function
+        run: dotnet publish TinyUrlCleaner/TinyUrlCleaner.csproj -c Release -o ./publish_function
 
       # --- STEP 5: DEPLOY API + UI TO WEB APP ---
       - name: Deploy Web App
