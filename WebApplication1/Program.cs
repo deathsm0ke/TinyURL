@@ -41,6 +41,11 @@ var app = builder.Build();
 app.UseCors("AllowAngular");
 app.UseDefaultFiles();
 app.UseStaticFiles();
+
+
+app.UseRouting();
+app.UseCors("AllowAngular");
+app.UseAuthorization();
 // --- UTILITY LOGIC ---
 
 string GenerateShortCode() => Guid.NewGuid().ToString("n").Substring(0, 6);
@@ -113,7 +118,7 @@ app.MapDelete("/api/delete/{code}", async (string code, ApiDbContext db) =>
 });
 
 app.MapFallbackToFile("index.html");
-app.UseRouting();
+
 
 app.Run();
 
