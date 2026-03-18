@@ -27,10 +27,7 @@ jobs:
         run: |
           cd tiny-url-ui
           npm install
-          npm run build -- --configuration production
-          # Create the wwwroot in the API folder and copy the UI build there
-          mkdir -p ../TinyUrlApi/wwwroot
-          cp -r dist/tiny-url-ui/browser/* ../TinyUrlApi/wwwroot/
+          npm run build -- --configuration production --output-path=../wwwroot --base-href=/
 
       # --- STEP 3: PUBLISH .NET 10 API ---
       - name: Publish API
