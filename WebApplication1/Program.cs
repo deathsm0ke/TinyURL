@@ -15,7 +15,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular", policy =>
     {
-        policy.WithOrigins("http://localhost:4200") // Angular URL
+        policy.WithOrigins("http://localhost:4200", "https://tinyurl-api-a-bya8audrdsg0efda.eastasia-01.azurewebsites.net") // Angular URL
               .AllowAnyMethod()
               .AllowAnyHeader();
     });
@@ -111,6 +111,9 @@ app.MapDelete("/api/delete/{code}", async (string code, ApiDbContext db) =>
 
     return Results.Ok(new { message = $"Deleted code: {code}" });
 });
+
+app.MapFallbackToFile("index.html");
+app.UseRouting();
 
 app.Run();
 
