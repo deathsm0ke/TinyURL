@@ -27,7 +27,7 @@ jobs:
         run: |
           cd tiny-url-ui
           npm install
-          npm run build -- --configuration production
+          npx ng build --configuration production --output-path=dist --base-href=/
 
       # --- STEP 3: PUBLISH .NET 10 API ---
       - name: Publish API
@@ -35,17 +35,17 @@ jobs:
           # 1. Publish the .NET binaries
           dotnet publish WebApplication1/WebApplication1.csproj -c Release -o ./publish_api
           
-          # 2. Create the wwwroot folder in the publish directory if it doesn't exist
+          # 2. Create the wwwroot folder
           mkdir -p ./publish_api/wwwroot
           
-          # 3. MOVE the Angular files from the dist folder into the publish/wwwroot folder
-          # Modern Angular 17+ uses: dist/[project-name]/browser
-          cp -r WebApplication1/tiny-url-ui/dist/tiny-url-ui/browser/* ./publish_api/wwwroot/
+          # 3. Copy from the 'dist/browser' folder we just created
+          # Note: Modern Angular puts everything in a 'browser' subfolder
+          cp -r WebApplication1/tiny-url-ui/dist/browser/* ./publish_api/wwwroot/
           
-          # 4. DIAGNOSTIC: List files to confirm index.html is there before uploading
-          echo "Checking publish_api/wwwroot content:"
-          ls ./publish_api/wwwroot
-          
+          # 4. DIAGNOSTIC: This will show us if index.html is actually there
+          echo "Final check of wwwroot content:"
+          ls -R ./publish_api/wwwroot
+
       # --- STEP 4: PUBLISH .NET 10 FUNCTION (Isolated) ---
       - name: Publish Function
         run: dotnet publish TinyUrlCleaner/TinyUrlCleaner.csproj -c Release -o ./publish_function
