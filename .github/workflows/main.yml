@@ -41,11 +41,11 @@ jobs:
           # 2. Create the wwwroot folder in the publish directory
           mkdir -p ./publish_api/wwwroot
           
-          # 3. Copy the Angular assets. 
-          # Since we are in the root, the path is WebApplication1/tiny-url-ui/dist/browser/
-          cp -r WebApplication1/tiny-url-ui/dist/browser/* ./publish_api/wwwroot/
+          # 3. Copy the Angular assets from the DOUBLE NESTED browser folder
+          # Based on your logs, the path is: tiny-url-ui/dist/browser/browser/
+          cp -r WebApplication1/tiny-url-ui/dist/browser/browser/* ./publish_api/wwwroot/
           
-          # 4. FINAL DIAGNOSTIC: This MUST show index.html
+          # 4. FINAL CHECK: Confirm index.html is in the right place
           echo "Final check of the deployment package (wwwroot):"
           ls -F ./publish_api/wwwroot
 
