@@ -27,33 +27,14 @@ jobs:
         run: |
           cd tiny-url-ui
           npm install
-          npx ng build --configuration production --output-path=dist/browser --base-href=/
-          
-          echo "Verifying Angular build output:"
-          ls -R dist/browser
+          npm run build -- --configuration production
+          # Create the wwwroot in the API folder and copy the UI build there
+          mkdir -p ../TinyUrlApi/wwwroot
+          cp -r dist/tiny-url-ui/browser/* ../TinyUrlApi/wwwroot/
 
       # --- STEP 3: PUBLISH .NET 10 API ---
       - name: Publish API
-        run: |
-          # 1. Build Angular (Stay inside the UI folder)
-          cd WebApplication1/tiny-url-ui
-          npm install
-          npx ng build --configuration production --output-path=dist/browser
-          
-          # 2. Go back to Root and Publish .NET
-          cd ../../
-          dotnet publish WebApplication1/WebApplication1.csproj -c Release -o ./publish_api
-          
-          # 3. Create wwwroot and Move files using the LOCAL path relative to the UI folder
-          mkdir -p ./publish_api/wwwroot
-          
-          # This path is now 100% guaranteed because we just built it 2 lines ago
-          cp -r WebApplication1/tiny-url-ui/dist/browser/browser/* ./publish_api/wwwroot/
-          
-          # 4. FINAL VERIFICATION (Check the logs for this!)
-          echo "Listing final publish package wwwroot content:"
-          ls -F ./publish_api/wwwroot
-          
+        run: dotnet publish WebApplication1/WebApplication1.csproj -c Release -o ./publish_api
 
       # --- STEP 4: PUBLISH .NET 10 FUNCTION (Isolated) ---
       - name: Publish Function
